@@ -111,6 +111,17 @@ if(nullif(
 								WHERE b.SOURCE_PHONE_NUMBER = pl.SOURCE_PHONE_NUMBER))),'N','Y') AS flag
 FROM phone_log pl;
 
+select t1.source_phone_number, if(nullif(t1.fv,t2.lv),'Y','N') flag, t1.fv,t2.lv from
+(select distinct source_phone_number, 
+first_value(destination_phone_number) over (partition by source_phone_number order by call_start_datetime) fv
+from phone_log) t1
+left join 
+(select  distinct source_phone_number, 
+first_value(destination_phone_number) over (partition by source_phone_number order by call_start_datetime desc) lv
+from phone_log) t2 on t1.source_phone_number = t2.source_phone_number
+	;
+
+
 
 /*QUESTION 4 #############################################*/
 drop table if exists book_lang;
